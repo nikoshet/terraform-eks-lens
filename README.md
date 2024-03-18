@@ -7,7 +7,7 @@ git clone https://github.com/doitintl/terraform-eks-lens.git
 cd terraform-eks-lens
 ```
 
-Configure the AWS and Kubernetes providers:
+Configure the AWS and Kubernetes providers in the provider.tf file. For example:
 ```hcl
 # Configure the AWS Provider
 provider "aws" {
