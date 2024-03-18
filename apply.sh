@@ -60,6 +60,11 @@ if [ $ec2_cluster = false ]; then
       printf "\ncluster_oidc_issuer_url = \"${CLUSTER_OIDC_ISSUER_URL}\"\n" >> terraform.tfvars
     fi
   fi
+else 
+  # if it's an EC2 cluster then we don't need cluster_oidc_issuer_url
+  if [ ! -f "terraform.tfvars" ]; then
+    touch terraform.tfvars
+  fi
 fi
 
 # check if terraform plan has changes
