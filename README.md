@@ -1,5 +1,12 @@
 # Terraform module to deploy Doit EKS Lens feature to AWS
 
+Clone the repository:
+```bash
+git clone https://github.com/doitintl/terraform-eks-lens.git
+
+cd terraform-eks-lens
+```
+
 Create a Doit API Key and set it as an environment variable:
 https://console.doit.com/customers/{XXXXXXX}/profile/{YYYYYYYYY}/api
 
@@ -16,12 +23,23 @@ Then it will ask for the following parameters:
 
     1. AWS Account ID
     2. AWS Region
-    3. EKSCluster Name
-    4. The OIDC Identity issuer URL for the cluster if You deploy the EKS cluster with OIDC identity provider enabled.
+    3. Cluster Name
+    4. The OIDC Identity issuer URL for the cluster if You deploy the EKS cluster with OIDC identity provider enabled. You can provide the URL with `CLUSTER_OIDC_ISSUER_URL` environment variable.
 
-Then it will download the `doit-eks-lens.tfvars` file with the doit API call using the `DOIT_API_KEY` environment variable.
+Then it will download the `doit-eks-lens.tfvars` file with the doit API call using the `DOIT_API_KEY` environment variable. This file contains the feature configuration for the cluster.
+For example:
+```hcl
+account_id       = "626859882963"
+region           = "us-east-1"
+cluster_name     = "eks-cluster-951"
+deployment_id    = "BrWMlJOcrI1FguHdAzRR"
+kube_state_image = "registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.9.2"
+otel_image       = "otel/opentelemetry-collector-contrib:0.83.0"
+ec2_cluster      = false
+```
 
 After that, it will apply the terraform configuration to create the Doit EKS Lens feature deployments.
+
 ```bash
 terraform apply -var-file=<(cat doit-eks-lens.tfvars terraform.tfvars) -auto-approve
 ```
