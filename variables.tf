@@ -60,3 +60,7 @@ variable "ec2_cluster" {
   default     = false
 }
 
+output "ec2_cluster" {
+  value = var.ec2_cluster
+}
+

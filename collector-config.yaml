@@ -186,4 +186,4 @@ service:
           memory_limiter,
           batch,
         ]
-      exporters: [awss3] # logging,
+      exporters: [awss3]
