@@ -1,0 +1,5 @@
+local_providers.tf
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate*
