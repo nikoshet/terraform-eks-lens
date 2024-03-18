@@ -7,6 +7,21 @@ git clone https://github.com/doitintl/terraform-eks-lens.git
 cd terraform-eks-lens
 ```
 
+Configure the AWS and Kubernetes providers:
+```hcl
+# Configure the AWS Provider
+provider "aws" {
+    region     = "{cluster aws region}"
+    access_key = "{aws access key}"
+    secret_key = "{aws secret key}"
+}
+
+# Configure the Kubernetes Provider
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
+```
+
 Create a Doit API Key and set it as an environment variable:
 https://console.doit.com/customers/{XXXXXXX}/profile/{YYYYYYYYY}/api
 
