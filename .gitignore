@@ -3,3 +3,4 @@ local_providers.tf
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate*
+providers.conf.tf

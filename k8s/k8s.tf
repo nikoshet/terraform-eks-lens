@@ -152,7 +152,7 @@ resource "kubernetes_deployment" "kube_state_metrics" {
 
         container {
           name  = "kube-state-metrics"
-          image = var.kube_state_image
+          image = var.cluster.kube_state_image
 
           image_pull_policy = "IfNotPresent"
 
@@ -232,7 +232,7 @@ resource "kubernetes_service_account" "doit_collector" {
 
     // conditionally add the eks.amazonaws.com/role-arn annotation if the AWS access key is not provided (used for ec2 cluster deployments)
     annotations = {
-      "eks.amazonaws.com/role-arn" = var.ec2_cluster == false ? aws_iam_role.doit_eks_lens_collector[0].arn : ""
+      "eks.amazonaws.com/role-arn" = var.ec2_cluster == false ? var.role_arn : ""
     }
   }
 }
@@ -330,7 +330,7 @@ resource "kubernetes_config_map" "doit_collector_config" {
     namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
     labels = merge(local.labels, {
       "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.deployment_id
+      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
     })
   }
 
@@ -338,9 +338,9 @@ resource "kubernetes_config_map" "doit_collector_config" {
     "collector.yaml" = "${templatefile(
       "${path.module}/collector-config.yaml",
       {
-        doit_metrics_deployment_id = var.deployment_id
-        collector_bucket_name      = aws_s3_bucket.doit_eks_lens.id
-        collector_bucket_prefix    = "eks-metrics/${var.account_id}/${var.region}/${var.cluster_name}"
+        doit_metrics_deployment_id = var.cluster.deployment_id
+        collector_bucket_name      = var.s3_bucket
+        collector_bucket_prefix    = "eks-metrics/${var.account_id}/${var.region}/${var.cluster.cluster_name}"
         region                     = var.region
       }
     )}"
@@ -356,19 +356,15 @@ resource "kubernetes_secret" "collector_access_key" {
     namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
     labels = merge(local.labels, {
       "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.deployment_id
+      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
     })
   }
 
   data = {
-    AWS_ACCESS_KEY_ID = aws_iam_access_key.doit_eks_lens_collector[0].id
+    AWS_ACCESS_KEY_ID = var.aws_access_key
   }
 
   type = "kubernetes.io/generic"
-
-  lifecycle {
-
-  }
 }
 
 // conditionally create a secret for the AWS secret access key if it is provided (used for ec2 cluster deployments)
@@ -380,24 +376,25 @@ resource "kubernetes_secret" "collector_seccret_key" {
     namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
     labels = merge(local.labels, {
       "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.deployment_id
+      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
     })
   }
 
   data = {
-    AWS_SECRET_ACCESS_KEY = aws_iam_access_key.doit_eks_lens_collector[0].secret
+    AWS_SECRET_ACCESS_KEY = var.aws_secret_key
   }
 
   type = "kubernetes.io/generic"
 }
 
 resource "kubernetes_deployment" "collector" {
+  depends_on = [kubernetes_config_map.doit_collector_config]
   metadata {
     name      = "collector"
     namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
     labels = merge(local.labels, {
       "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.deployment_id
+      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
     })
   }
 
@@ -407,7 +404,7 @@ resource "kubernetes_deployment" "collector" {
     selector {
       match_labels = merge(local.labels, {
         "app.kubernetes.io/component"    = "doit-collector"
-        "doit.com/metrics-deployment-id" = var.deployment_id
+        "doit.com/metrics-deployment-id" = var.cluster.deployment_id
       })
 
     }
@@ -416,7 +413,7 @@ resource "kubernetes_deployment" "collector" {
       metadata {
         labels = merge(local.labels, {
           "app.kubernetes.io/component"    = "doit-collector"
-          "doit.com/metrics-deployment-id" = var.deployment_id
+          "doit.com/metrics-deployment-id" = var.cluster.deployment_id
         })
       }
 
@@ -426,7 +423,7 @@ resource "kubernetes_deployment" "collector" {
 
         container {
           name  = "otelcol"
-          image = var.otel_image
+          image = var.cluster.otel_image
 
           image_pull_policy = "IfNotPresent"
 
@@ -542,5 +539,9 @@ resource "kubernetes_deployment" "collector" {
         }
       }
     }
+  }
+
+  provisioner "local-exec" {
+    command = "curl -X POST -H 'Content-Type: application/json' -d '{\"account_id\": \"${var.account_id}\",\"region\": \"${var.region}\",\"cluster_name\": \"${var.cluster.cluster_name}\", \"deployment_id\": \"${var.cluster.deployment_id}\" }' http://localhost:8086/terraform-validate"
   }
 }
