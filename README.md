@@ -71,5 +71,5 @@ Delete cluster's specific terraform file ({clustername}.tf)
 
 execute the following command:
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{"account_id\": "{{.AccountID}}","region": "{{.Region}}","cluster_name": "{{.ClusterName}}" }' http://localhost:8086/terraform-destroy
+curl -X POST -H 'Content-Type: application/json' -d '{"account_id": "{{.AccountID}}","region": "{{.Region}}","cluster_name": "{{.ClusterName}}" }' http://localhost:8086/terraform-destroy
 ```
