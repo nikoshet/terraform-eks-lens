@@ -3,6 +3,7 @@
 !!! warning
     This module is in development and should not be used in production.
 
+# Onboarding
 
 Clone this repository for each account/region:
 ```bash
@@ -60,4 +61,13 @@ OPTIONAL: Set up your AWS provider using environment variables:
 export AWS_ACCESS_KEY_ID="<<aws-access_key>>"
 export AWS_SECRET_ACCESS_KEY="<<aws-secret_key>>"
 export AWS_REGION="<<aws-region>>"
+```
+
+## Off boarding
+
+Delete cluster's specific terraform file ({clustername}.tf)
+
+execute the following command:
+```bash
+curl -X POST -H 'Content-Type: application/json' -d '{"account_id\": "{{.AccountID}}","region": "{{.Region}}","cluster_name": "{{.ClusterName}}" }' http://localhost:8086/terraform-destroy
 ```
