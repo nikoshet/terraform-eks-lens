@@ -1,3 +1,12 @@
+# git clone https://github.com/doitintl/terraform-eks-lens.git
+# cd terraform-eks-lens
+# Put the following code in a file called eks-cluster-951.tf
+# Set up the kubernetes provider in the file
+# Set up the aws provider in the provider.tf file
+# terraform init
+# terraform plan
+# terraform apply
+
 module "eks-cluster-951" {
   source = "./ekscluster"
 
@@ -44,17 +53,20 @@ resource "time_sleep" "wait_60_seconds" {
   create_duration = "60s"
 }
 
+
+// Trigger cluster validation on Doit
 resource "null_resource" "deploy_cluster" {
   depends_on = [time_sleep.wait_60_seconds]
 
   provisioner "local-exec" {
     when       = create
-    command    = "curl -X POST -H 'Content-Type: application/json' -d '{\"account_id\": \"626859882963\",\"region\": \"us-east-1\",\"cluster_name\": \"eks-cluster-951\" }' http://localhost:8086/terraform-validate"
+    command    = "curl -X POST -H 'Content-Type: application/json' -d '{\"account_id\": \"626859882963\",\"region\": \"us-east-1\",\"cluster_name\": \"eks-cluster-951\", \"deployment_id\": \"AKD6ikz4k3Z52rF9sXew\" }' http://localhost:8086/terraform-validate"
     quiet      = true
     on_failure = continue
   }
 }
 
+// Trigger cluster destruction on Doit
 resource "null_resource" "destroy_cluster" {
   depends_on = [time_sleep.wait_60_seconds]
 
@@ -65,6 +77,7 @@ resource "null_resource" "destroy_cluster" {
     on_failure = continue
   }
 }
+
 
 ## Configure Your Cluster Provider
 # With .kube/config
