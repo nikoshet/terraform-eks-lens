@@ -1,6 +1,6 @@
 // S3 Bucket
 resource "aws_s3_bucket" "doit_eks_lens" {
-  bucket        = "doitintl-eks-metrics-${data.aws_caller_identity.current.account_id}-${var.region}"
+  bucket        = "doitintl-eks-metrics-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}"
   force_destroy = true
 }
 

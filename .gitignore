@@ -4,3 +4,5 @@ local_providers.tf
 .terraform.lock.hcl
 terraform.tfstate*
 providers.conf.tf
+eks-cluster-951_provider.tf
+eks-cluster-951.tf
