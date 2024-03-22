@@ -12,7 +12,8 @@ cd eks-lens-{account}-{region}
 ```
 Download Your cluster's specific terraform file ({clustername}.tf) from the EKS Lens console and place it in.
 
-If you have EC2 cluster (not eks) in this account/region then you should create a aws_iam_user
+If you have EC2 cluster (not eks) in this account/region then you should create an aws_iam_user.
+
 Open the aws_iam_user.tf file and enable it.
 
 Configure your cluster provider in the {clustername}_provider.tf file.
