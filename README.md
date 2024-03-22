@@ -2,8 +2,10 @@
 
 !!! warning
     This module is in development and should not be used in production.
+* [On boarding](#On-boarding)
+* [Off boarding](#Off-boarding)
 
-# Onboarding
+## On boarding
 
 Clone this repository for each account/region:
 ```bash
