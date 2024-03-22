@@ -389,6 +389,7 @@ resource "kubernetes_secret" "collector_seccret_key" {
 
 resource "kubernetes_deployment" "collector" {
   depends_on = [kubernetes_config_map.doit_collector_config]
+
   metadata {
     name      = "collector"
     namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
@@ -540,8 +541,8 @@ resource "kubernetes_deployment" "collector" {
       }
     }
   }
+}
 
-  provisioner "local-exec" {
-    command = "curl -X POST -H 'Content-Type: application/json' -d '{\"account_id\": \"${var.account_id}\",\"region\": \"${var.region}\",\"cluster_name\": \"${var.cluster.cluster_name}\", \"deployment_id\": \"${var.cluster.deployment_id}\" }' http://localhost:8086/terraform-validate"
-  }
+output "collector" {
+  value = kubernetes_deployment.collector.metadata[0].name
 }

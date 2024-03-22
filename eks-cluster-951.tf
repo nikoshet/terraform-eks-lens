@@ -37,6 +37,35 @@ module "k8s_eks-cluster-951" {
   }
 }
 
+// Wait for the cluster to be ready and produce metrics to s3 bucket
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [aws_s3_bucket.doit_eks_lens, module.k8s_eks-cluster-951.collector]
+
+  create_duration = "60s"
+}
+
+resource "null_resource" "deploy_cluster" {
+  depends_on = [time_sleep.wait_60_seconds]
+
+  provisioner "local-exec" {
+    when       = create
+    command    = "curl -X POST -H 'Content-Type: application/json' -d '{\"account_id\": \"626859882963\",\"region\": \"us-east-1\",\"cluster_name\": \"eks-cluster-951\" }' http://localhost:8086/terraform-validate"
+    quiet      = true
+    on_failure = continue
+  }
+}
+
+resource "null_resource" "destroy_cluster" {
+  depends_on = [time_sleep.wait_60_seconds]
+
+  provisioner "local-exec" {
+    when       = destroy
+    command    = "curl -X POST -H 'Content-Type: application/json' -d '{\"account_id\": \"626859882963\",\"region\": \"us-east-1\",\"cluster_name\": \"eks-cluster-951\" }' http://localhost:8086/terraform-destroy"
+    quiet      = true
+    on_failure = continue
+  }
+}
+
 ## Configure Your Cluster Provider
 # With .kube/config
 # provider "kubernetes" {
