@@ -15,10 +15,6 @@ cd eks-lens-{account}-{region}
 ```
 Download Your cluster's specific terraform file ({clustername}.tf) from the EKS Lens console and place it in.
 
-If you have EC2 cluster (not eks) in this account/region then you should create an aws_iam_user.
-
-Open the aws_iam_user.tf file and enable it.
-
 Configure your cluster provider in the {clustername}_provider.tf file.
 https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/guides/getting-started
 ```hcl
@@ -51,18 +47,27 @@ provider "kubernetes" {
 
 Set up your AWS provider in the aws_provider.tf file:
 https://registry.terraform.io/providers/hashicorp/aws/latest/docs
-```hcl
-provider "aws" {
-  access_key = "<<aws-access_key>>"
-  secret_key = "<<aws-secret_key>>"
-  region     = "<<aws-region>>"
-}
-```
-OPTIONAL: Set up your AWS provider using environment variables:
 ```bash
 export AWS_ACCESS_KEY_ID="<<aws-access_key>>"
 export AWS_SECRET_ACCESS_KEY="<<aws-secret_key>>"
 export AWS_REGION="<<aws-region>>"
+```
+
+OR
+
+```hcl
+provider "aws" {
+  shared_config_files      = ["/Users/tf_user/.aws/conf"]
+  shared_credentials_files = ["/Users/tf_user/.aws/creds"]
+  profile                  = "customprofile"
+}
+```
+
+Then run the following commands:
+```bash
+terraform init
+terraform plan
+terraform apply
 ```
 
 ## Off boarding
