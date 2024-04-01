@@ -76,5 +76,5 @@ Delete cluster's specific terraform file ({clustername}.tf)
 
 execute the following command:
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{"account_id": "<<AccountID>>","region": "<<Region>>","cluster_name": "<<ClusterName>>", "deployment_id": "<<DeploymentID>>" }' https://scheduled-tasks-dot-me-doit-intl-com.uc.r.appspot.com/webhooks/v1/eks-metrics/terraform-destroy
+curl -X POST -H 'Content-Type: application/json' -d '{"account_id": "<<AccountID>>","region": "<<Region>>","cluster_name": "<<ClusterName>>", "deployment_id": "<<DeploymentID>>" }' https://console.doit.com/webhooks/v1/eks-metrics/terraform-destroy
 ```
