@@ -38,6 +38,6 @@ data "aws_iam_policy_document" "doit_eks_lens_s3" {
 }
 
 resource "aws_iam_policy" "doit_eks_lens" {
-  name   = "doitintl_eks_s3"
+  name   = "doit_eks_lens_s3_${data.aws_region.current.name}"
   policy = data.aws_iam_policy_document.doit_eks_lens_s3.json
 }
