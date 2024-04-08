@@ -1,7 +1,5 @@
 # Terraform module to deploy Doit EKS Lens feature to AWS
 
-!!! warning
-    This module is in development and should not be used in production.
 * [On boarding](#On-boarding)
 * [Off boarding](#Off-boarding)
 
