@@ -1,4 +1,4 @@
-# Terraform module to deploy Doit EKS Lens feature to AWS
+# Terraform files to deploy Doit EKS Lens feature to AWS
 
 * [On boarding](#On-boarding)
 * [Off boarding](#Off-boarding)
@@ -13,7 +13,7 @@ cd eks-lens-{account}-{region}
 ```
 Download Your cluster's specific terraform file ({clustername}.tf) from the EKS Lens console and place it in.
 
-Configure your cluster provider in the {clustername}_provider.tf file.
+Create a {clustername}_provider.tf file and configure your cluster provider.
 https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/guides/getting-started
 ```hcl
 ## Configure Your Cluster Provider
