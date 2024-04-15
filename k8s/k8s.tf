@@ -212,8 +212,6 @@ resource "kubernetes_service" "kube_state_metrics" {
   }
 
   spec {
-    cluster_ip = "None"
-
     port {
       name        = "http-metrics"
       port        = 8080
