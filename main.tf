@@ -1,5 +1,3 @@
-
-
 data "aws_caller_identity" "current" {} # data.aws_caller_identity.current.account_id
 data "aws_region" "current" {}          # data.aws_region.current.name
 
@@ -31,4 +29,3 @@ resource "aws_iam_role_policy_attachment" "doit_eks_lens_import" {
   role       = aws_iam_role.doit_eks_lens_import.name // cross account role
   policy_arn = aws_iam_policy.doit_eks_lens.arn       // s3 policy
 }
-

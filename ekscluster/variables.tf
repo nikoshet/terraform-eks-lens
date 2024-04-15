@@ -35,4 +35,3 @@ variable "s3_policy" {
 }
 
 variable "cluster_name" {}
-

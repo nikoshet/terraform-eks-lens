@@ -37,6 +37,3 @@ resource "aws_iam_role_policy_attachment" "doit_eks_lens_collector" {
   role       = aws_iam_role.doit_eks_lens_collector.name // oidc role
   policy_arn = var.s3_policy                             // s3 policy
 }
-
-
-
