@@ -7,6 +7,11 @@ variable "cluster" {
   })
 }
 
+variable "doit_webhook_url" {
+  type    = string
+  default = "https://console.doit.com/webhooks/v1/eks-metrics"
+}
+
 variable "cluster_oidc_issuer_url" {
   type        = string
   description = "The OIDC Identity issuer URL for the cluster"

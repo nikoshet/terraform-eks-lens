@@ -78,3 +78,52 @@ resource "aws_iam_user_policy_attachment" "iam_policy" {
   policy_arn = local.s3_policy_arn
   user       = aws_iam_user.doit_eks_lens_collector[count.index].name
 }
+
+// Wait 60s for collector to run and start writing metrics to S3
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [kubernetes_deployment.collector]
+
+  create_duration = "60s"
+}
+
+// Register/de-register cluster on DoiT
+resource "null_resource" "doit_webhook_create" {
+  depends_on = [time_sleep.wait_60_seconds]
+
+  provisioner "local-exec" {
+    when       = create
+    command    = <<EOT
+    curl -X POST -H 'Content-Type: application/json' -d '{
+      "account_id": "${local.account_id}",
+      "region": "${local.region}",
+      "cluster_name": "${var.cluster.name}",
+      "deployment_id": "${var.cluster.deployment_id}"
+    }' ${var.doit_webhook_url}/terraform-validate
+    EOT
+    on_failure = fail # in case this fails, the resources will be tainted and a re-apply will be necessary
+  }
+
+}
+
+resource "null_resource" "doit_webhook_destroy" {
+  triggers = {
+    account_id    = local.account_id
+    region        = local.region
+    cluster_name  = var.cluster.name
+    deployment_id = var.cluster.deployment_id
+    webhook_url   = var.doit_webhook_url
+  }
+
+  provisioner "local-exec" {
+    when       = destroy
+    command    = <<EOT
+    curl -X POST -H 'Content-Type: application/json' -d '{
+      "account_id": "${self.triggers.account_id}",
+      "region": "${self.triggers.region}",
+      "cluster_name": "${self.triggers.cluster_name}",
+      "deployment_id": "${self.triggers.deployment_id}"
+    }' ${self.triggers.webhook_url}/terraform-destroy
+    EOT
+    on_failure = fail # in case this fails, the resources will be tainted and a re-apply will be necessary
+  }
+}
