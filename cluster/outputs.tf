@@ -11,11 +11,11 @@ output "deployment_id" {
 }
 
 output "collector_deployment" {
-  value       = "${local.namespace}/${kubernetes_deployment.collector.metadata[0].name}"
+  value       = var.deploy_manifests ? "${local.namespace}/${kubernetes_deployment.collector[0].metadata[0].name}" : "Not managed by this module"
   description = "Collector deployment name"
 }
 
 output "kube_state_metrics_deployment" {
-  value       = "${local.namespace}/${kubernetes_deployment.kube_state_metrics.metadata[0].name}"
+  value       = var.deploy_manifests ? "${local.namespace}/${kubernetes_deployment.kube_state_metrics[0].metadata[0].name}" : "Not managed by this module"
   description = "Kube-state-metrics deployment name"
 }

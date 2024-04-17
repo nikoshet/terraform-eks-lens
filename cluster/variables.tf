@@ -23,3 +23,9 @@ variable "ec2_cluster" {
   description = "Set to true if this is a self-managed cluster running on EC2"
   default     = false
 }
+
+variable "deploy_manifests" {
+  type        = bool
+  description = "Set to false if you don't want the module to deploy EKS Lens to the cluster"
+  default     = true
+}

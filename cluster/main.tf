@@ -81,6 +81,7 @@ resource "aws_iam_user_policy_attachment" "iam_policy" {
 
 // Wait 60s for collector to run and start writing metrics to S3
 resource "time_sleep" "wait_60_seconds" {
+  count      = var.deploy_manifests ? 1 : 0
   depends_on = [kubernetes_deployment.collector]
 
   create_duration = "60s"
@@ -88,6 +89,7 @@ resource "time_sleep" "wait_60_seconds" {
 
 // Register/de-register cluster on DoiT
 resource "null_resource" "doit_webhook_create" {
+  count      = var.deploy_manifests ? 1 : 0
   depends_on = [time_sleep.wait_60_seconds]
 
   provisioner "local-exec" {
@@ -106,6 +108,8 @@ resource "null_resource" "doit_webhook_create" {
 }
 
 resource "null_resource" "doit_webhook_destroy" {
+  count = var.deploy_manifests ? 1 : 0
+
   triggers = {
     account_id    = local.account_id
     region        = local.region

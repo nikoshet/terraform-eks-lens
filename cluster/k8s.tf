@@ -22,12 +22,16 @@ locals {
 }
 
 resource "kubernetes_namespace_v1" "doit_eks_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name = local.namespace
   }
 }
 
 resource "kubernetes_service_account" "doit_kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "doit-kube-state-metrics"
     namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
@@ -35,6 +39,8 @@ resource "kubernetes_service_account" "doit_kube_state_metrics" {
 }
 
 resource "kubernetes_cluster_role" "doit_kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-kube-state-metrics"
     labels = local.kube_state_metrics_labels
@@ -126,6 +132,8 @@ resource "kubernetes_cluster_role" "doit_kube_state_metrics" {
 }
 
 resource "kubernetes_cluster_role_binding" "doit_kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-kube-state-metrics"
     labels = local.kube_state_metrics_labels
@@ -134,17 +142,19 @@ resource "kubernetes_cluster_role_binding" "doit_kube_state_metrics" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.doit_kube_state_metrics.metadata[0].name
+    name      = kubernetes_cluster_role.doit_kube_state_metrics[count.index].metadata[0].name
   }
 
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.doit_kube_state_metrics.metadata[0].name
+    name      = kubernetes_service_account.doit_kube_state_metrics[count.index].metadata[0].name
     namespace = local.namespace
   }
 }
 
 resource "kubernetes_deployment" "kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "kube-state-metrics"
     namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
@@ -164,7 +174,7 @@ resource "kubernetes_deployment" "kube_state_metrics" {
       }
 
       spec {
-        service_account_name            = kubernetes_service_account.doit_kube_state_metrics.metadata[0].name
+        service_account_name            = kubernetes_service_account.doit_kube_state_metrics[count.index].metadata[0].name
         automount_service_account_token = true
 
         container {
@@ -222,6 +232,8 @@ resource "kubernetes_deployment" "kube_state_metrics" {
 }
 
 resource "kubernetes_service" "kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "kube-state-metrics"
     namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
@@ -240,6 +252,8 @@ resource "kubernetes_service" "kube_state_metrics" {
 }
 
 resource "kubernetes_service_account" "doit_collector" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "doit-collector"
     namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
@@ -253,6 +267,8 @@ resource "kubernetes_service_account" "doit_collector" {
 }
 
 resource "kubernetes_cluster_role" "doit_otel" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-otel"
     labels = local.doit_collector_labels
@@ -321,6 +337,8 @@ resource "kubernetes_cluster_role" "doit_otel" {
 }
 
 resource "kubernetes_cluster_role_binding" "doit_otel" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-otel"
     labels = local.doit_collector_labels
@@ -329,17 +347,19 @@ resource "kubernetes_cluster_role_binding" "doit_otel" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.doit_otel.metadata[0].name
+    name      = kubernetes_cluster_role.doit_otel[count.index].metadata[0].name
   }
 
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.doit_collector.metadata[0].name
+    name      = kubernetes_service_account.doit_collector[count.index].metadata[0].name
     namespace = local.namespace
   }
 }
 
 resource "kubernetes_config_map" "doit_collector_config" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "doit-collector-config"
     namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
@@ -361,7 +381,7 @@ resource "kubernetes_config_map" "doit_collector_config" {
 
 // Conditionally create a secret with AWS credentials if cluster is self-managed running on EC2
 resource "kubernetes_secret" "collector_aws_credentials" {
-  count = var.ec2_cluster ? 1 : 0
+  count = var.deploy_manifests && var.ec2_cluster ? 1 : 0
 
   metadata {
     name      = "aws-credentials"
@@ -378,6 +398,8 @@ resource "kubernetes_secret" "collector_aws_credentials" {
 }
 
 resource "kubernetes_deployment" "collector" {
+  count = var.deploy_manifests ? 1 : 0
+
   depends_on = [kubernetes_config_map.doit_collector_config]
 
   metadata {
