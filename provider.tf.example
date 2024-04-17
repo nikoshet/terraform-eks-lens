@@ -1,0 +1,57 @@
+## AWS provider
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+
+# With credentials/region inferred from your shared AWS config
+provider "aws" {}
+
+# Credentials and region can also be provided as environment variables for the above block
+# export AWS_ACCESS_KEY_ID="anaccesskey"
+# export AWS_SECRET_ACCESS_KEY="asecretkey"
+# export AWS_REGION="us-west-2"
+
+# With explicit configuration
+provider "aws" {
+  region     = "us-west-2"
+  access_key = "my-access-key"
+  secret_key = "my-secret-key"
+}
+
+# Pointing to a specific profile in your shared AWS config
+provider "aws" {
+  profile = "customprofile"
+}
+
+# Pointing to specific shared AWS config and profile
+provider "aws" {
+  shared_config_files      = ["/Users/tf_user/.aws/conf"]
+  shared_credentials_files = ["/Users/tf_user/.aws/creds"]
+  profile                  = "customprofile"
+}
+
+
+## Kubernetes provider
+# https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/guides/getting-started#provider-setup
+
+# With .kube/config
+provider "kubernetes" {
+  alias          = "<<clustername>>"
+  config_path    = "~/.kube/config"
+  config_context = "<<Your Cluster Context>>"
+}
+
+# OR with Certificates
+provider "kubernetes" {
+  alias                  = "<<clustername>>"
+  host                   = "https://<<Your Cluster Host>>"
+  client_certificate     = file("<<cert.pem>>")
+  client_key             = file("<<key.pem>>")
+  cluster_ca_certificate = file("<<ca-cert.pem>>")
+}
+
+# OR with AWS 
+provider "kubernetes" {
+  alias                  = "<<clustername>>"
+  host                   = data.aws_eks_cluster.<<Your Cluster>>.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.<<Your Cluster>>.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.<<Your Cluster>>.token
+}
