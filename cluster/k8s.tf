@@ -1,26 +1,49 @@
 locals {
-  labels = {
+  namespace = "doit-eks-metrics"
+
+  base_labels = {
     "app.kubernetes.io/name" = "doit_eks_lens"
   }
+
+  kube_state_metrics_labels = merge(
+    local.base_labels,
+    { "app.kubernetes.io/component" = "doit-kube-state-metrics" }
+  )
+
+  doit_collector_labels = merge(
+    local.base_labels,
+    { "app.kubernetes.io/component" = "doit-collector" }
+  )
+
+  doit_collector_deployment_labels = merge(
+    local.doit_collector_labels,
+    { "doit.com/metrics-deployment-id" = var.cluster.deployment_id }
+  )
 }
 
 resource "kubernetes_namespace_v1" "doit_eks_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
-    name = "doit-eks-metrics"
+    name = local.namespace
   }
 }
 
 resource "kubernetes_service_account" "doit_kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "doit-kube-state-metrics"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
+    namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
   }
 }
 
 resource "kubernetes_cluster_role" "doit_kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-kube-state-metrics"
-    labels = merge(local.labels, { "app.kubernetes.io/component" = "doit-kube-state-metrics" })
+    labels = local.kube_state_metrics_labels
   }
 
   rule {
@@ -109,45 +132,49 @@ resource "kubernetes_cluster_role" "doit_kube_state_metrics" {
 }
 
 resource "kubernetes_cluster_role_binding" "doit_kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-kube-state-metrics"
-    labels = merge(local.labels, { "app.kubernetes.io/component" = "doit-kube-state-metrics" })
+    labels = local.kube_state_metrics_labels
   }
 
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.doit_kube_state_metrics.metadata[0].name
+    name      = kubernetes_cluster_role.doit_kube_state_metrics[count.index].metadata[0].name
   }
 
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.doit_kube_state_metrics.metadata[0].name
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
+    name      = kubernetes_service_account.doit_kube_state_metrics[count.index].metadata[0].name
+    namespace = local.namespace
   }
 }
 
 resource "kubernetes_deployment" "kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "kube-state-metrics"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
-    labels    = merge(local.labels, { "app.kubernetes.io/component" = "doit-kube-state-metrics" })
+    namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
+    labels    = local.kube_state_metrics_labels
   }
 
   spec {
     replicas = 1
 
     selector {
-      match_labels = merge(local.labels, { "app.kubernetes.io/component" = "doit-kube-state-metrics" })
+      match_labels = local.kube_state_metrics_labels
     }
 
     template {
       metadata {
-        labels = merge(local.labels, { "app.kubernetes.io/component" = "doit-kube-state-metrics" })
+        labels = local.kube_state_metrics_labels
       }
 
       spec {
-        service_account_name            = kubernetes_service_account.doit_kube_state_metrics.metadata[0].name
+        service_account_name            = kubernetes_service_account.doit_kube_state_metrics[count.index].metadata[0].name
         automount_service_account_token = true
 
         container {
@@ -205,10 +232,12 @@ resource "kubernetes_deployment" "kube_state_metrics" {
 }
 
 resource "kubernetes_service" "kube_state_metrics" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "kube-state-metrics"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
-    labels    = merge(local.labels, { "app.kubernetes.io/component" = "doit-kube-state-metrics" })
+    namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
+    labels    = local.kube_state_metrics_labels
   }
 
   spec {
@@ -218,27 +247,31 @@ resource "kubernetes_service" "kube_state_metrics" {
       target_port = 8080
     }
 
-    selector = merge(local.labels, { "app.kubernetes.io/component" = "doit-kube-state-metrics" })
+    selector = local.kube_state_metrics_labels
   }
 }
 
 resource "kubernetes_service_account" "doit_collector" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "doit-collector"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
-    labels    = merge(local.labels, { "app.kubernetes.io/component" = "doit-collector" })
+    namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
+    labels    = local.doit_collector_labels
 
     // conditionally add the eks.amazonaws.com/role-arn annotation if the AWS access key is not provided (used for ec2 cluster deployments)
     annotations = {
-      "eks.amazonaws.com/role-arn" = var.ec2_cluster == false ? var.role_arn : ""
+      "eks.amazonaws.com/role-arn" = var.ec2_cluster == false ? aws_iam_role.doit_eks_lens_collector[count.index].arn : ""
     }
   }
 }
 
 resource "kubernetes_cluster_role" "doit_otel" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-otel"
-    labels = merge(local.labels, { "app.kubernetes.io/component" = "doit-collector" })
+    labels = local.doit_collector_labels
   }
 
   rule {
@@ -304,32 +337,33 @@ resource "kubernetes_cluster_role" "doit_otel" {
 }
 
 resource "kubernetes_cluster_role_binding" "doit_otel" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name   = "doit-otel"
-    labels = merge(local.labels, { "app.kubernetes.io/component" = "doit-collector" })
+    labels = local.doit_collector_labels
   }
 
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.doit_otel.metadata[0].name
+    name      = kubernetes_cluster_role.doit_otel[count.index].metadata[0].name
   }
 
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.doit_collector.metadata[0].name
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
+    name      = kubernetes_service_account.doit_collector[count.index].metadata[0].name
+    namespace = local.namespace
   }
 }
 
 resource "kubernetes_config_map" "doit_collector_config" {
+  count = var.deploy_manifests ? 1 : 0
+
   metadata {
     name      = "doit-collector-config"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
-    labels = merge(local.labels, {
-      "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
-    })
+    namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
+    labels    = local.doit_collector_deployment_labels
   }
 
   data = {
@@ -337,88 +371,58 @@ resource "kubernetes_config_map" "doit_collector_config" {
       "${path.module}/collector-config.yaml",
       {
         doit_metrics_deployment_id = var.cluster.deployment_id
-        collector_bucket_name      = var.s3_bucket
-        collector_bucket_prefix    = "eks-metrics/${var.account_id}/${var.region}/${var.cluster.cluster_name}"
-        region                     = var.region
+        collector_bucket_name      = local.s3_bucket
+        collector_bucket_prefix    = "eks-metrics/${local.account_id}/${local.region}/${var.cluster.name}"
+        region                     = local.region
       }
     )}"
   }
 }
 
-// conditionally create a secret for the AWS access key if it is provided (used for ec2 cluster deployments)
-resource "kubernetes_secret" "collector_access_key" {
-  count = var.ec2_cluster == true ? 1 : 0
+// Conditionally create a secret with AWS credentials if cluster is self-managed running on EC2
+resource "kubernetes_secret" "collector_aws_credentials" {
+  count = var.deploy_manifests && var.ec2_cluster ? 1 : 0
 
   metadata {
-    name      = "aws-access-key-id"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
-    labels = merge(local.labels, {
-      "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
-    })
+    name      = "aws-credentials"
+    namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
+    labels    = local.doit_collector_deployment_labels
   }
 
   data = {
-    AWS_ACCESS_KEY_ID = var.aws_access_key
-  }
-
-  type = "kubernetes.io/generic"
-}
-
-// conditionally create a secret for the AWS secret access key if it is provided (used for ec2 cluster deployments)
-resource "kubernetes_secret" "collector_seccret_key" {
-  count = var.ec2_cluster == true ? 1 : 0
-
-  metadata {
-    name      = "aws-secret-access-key"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
-    labels = merge(local.labels, {
-      "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
-    })
-  }
-
-  data = {
-    AWS_SECRET_ACCESS_KEY = var.aws_secret_key
+    AWS_ACCESS_KEY_ID     = aws_iam_access_key.doit_eks_lens_collector[count.index].id
+    AWS_SECRET_ACCESS_KEY = aws_iam_access_key.doit_eks_lens_collector[count.index].secret
   }
 
   type = "kubernetes.io/generic"
 }
 
 resource "kubernetes_deployment" "collector" {
+  count = var.deploy_manifests ? 1 : 0
+
   depends_on = [kubernetes_config_map.doit_collector_config]
 
   metadata {
     name      = "collector"
-    namespace = kubernetes_namespace_v1.doit_eks_metrics.metadata[0].name
-    labels = merge(local.labels, {
-      "app.kubernetes.io/component"    = "doit-collector"
-      "doit.com/metrics-deployment-id" = var.cluster.deployment_id
-    })
+    namespace = kubernetes_namespace_v1.doit_eks_metrics[count.index].metadata[0].name
+    labels    = local.doit_collector_deployment_labels
   }
 
   spec {
     replicas = 1
 
     selector {
-      match_labels = merge(local.labels, {
-        "app.kubernetes.io/component"    = "doit-collector"
-        "doit.com/metrics-deployment-id" = var.cluster.deployment_id
-      })
-
+      match_labels = local.doit_collector_deployment_labels
     }
 
     template {
       metadata {
-        labels = merge(local.labels, {
-          "app.kubernetes.io/component"    = "doit-collector"
-          "doit.com/metrics-deployment-id" = var.cluster.deployment_id
-        })
+        labels = local.doit_collector_deployment_labels
       }
 
       spec {
         restart_policy       = "Always"
-        service_account_name = "doit-collector"
+        service_account_name = kubernetes_service_account.doit_collector[count.index].metadata[0].name
 
         container {
           name  = "otelcol"
@@ -428,31 +432,12 @@ resource "kubernetes_deployment" "collector" {
 
           args = ["--config=/conf/collector.yaml"]
 
-          // conditionally mount the AWS access key secret if it is provided (used for ec2 cluster deployments)
-          dynamic "env" {
-            for_each = var.ec2_cluster == true ? [true] : []
+          // conditionally mount AWS credentials if provided (used for ec2 cluster deployments)
+          dynamic "env_from" {
+            for_each = var.ec2_cluster ? [true] : []
             content {
-              name = "AWS_ACCESS_KEY_ID"
-              value_from {
-                secret_key_ref {
-                  name = "aws-access-key-id"
-                  key  = "AWS_ACCESS_KEY_ID"
-                }
-              }
-            }
-
-          }
-
-          // conditionally mount the AWS secret access key secret if it is provided (used for ec2 cluster deployments)
-          dynamic "env" {
-            for_each = var.ec2_cluster == true ? [true] : []
-            content {
-              name = "AWS_SECRET_ACCESS_KEY"
-              value_from {
-                secret_key_ref {
-                  name = "aws-secret-access-key"
-                  key  = "AWS_SECRET_ACCESS_KEY"
-                }
+              secret_ref {
+                name = kubernetes_secret.collector_aws_credentials[count.index].metadata[0].name
               }
             }
           }
@@ -539,8 +524,4 @@ resource "kubernetes_deployment" "collector" {
       }
     }
   }
-}
-
-output "collector" {
-  value = kubernetes_deployment.collector.metadata[0].name
 }
