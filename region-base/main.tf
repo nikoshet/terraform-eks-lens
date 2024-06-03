@@ -67,12 +67,11 @@ data "aws_iam_policy_document" "doit_eks_lens_import" {
 resource "aws_iam_role" "doit_eks_lens_import" {
   name               = "doitintl_eks_import_${local.region}"
   assume_role_policy = data.aws_iam_policy_document.doit_eks_lens_import.json
+  permissions_boundary = var.permissions_boundary
 
   tags = {
     Name = "doitintl_eks_import_${local.region}"
   }
-
-  permissions_boundary = var.permissions_boundary
 
 }
 
