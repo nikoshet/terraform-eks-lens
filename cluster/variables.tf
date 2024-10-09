@@ -37,30 +37,29 @@ variable "permissions_boundary" {
 }
 
 variable "otel_memory_limiter" {
-  type             = object({
-    check_interval = string
-    limit_percentage: number
-    spike_limit_percentage: number
-
+  type = object({
+    check_interval         = string
+    limit_percentage       = number
+    spike_limit_percentage = number
   })
-  default          = {
-    check_interval: "1s"
-    limit_percentage: 70
-    spike_limit_percentage: 30
+  default = {
+    check_interval         = "1s"
+    limit_percentage       = 70
+    spike_limit_percentage = 30
   }
 }
 
 variable "otel_resources" {
   type = object({
-    limits   = optional(object({
-        cpu    = optional(string)
-        memory = optional(string)
+    limits = optional(object({
+      cpu    = optional(string)
+      memory = optional(string)
     }))
     requests = optional(object({
-        cpu    = optional(string)
-        memory = optional(string)
-    })
-  )})
+      cpu    = optional(string)
+      memory = optional(string)
+      })
+  ) })
 
   default = {}
 }
