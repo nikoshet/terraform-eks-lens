@@ -10,7 +10,7 @@ module "<REGION>-<CLUSTER_NAME>" {
   source = "git::https://github.com/doitintl/terraform-eks-lens.git//cluster"
 
   cluster = {
-    cluster_name     = "<CLUSTER_NAME>"
+    name             = "<CLUSTER_NAME>"
     deployment_id    = "<DEPLOYMENT_ID>"
     kube_state_image = "registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.9.2" # make sure to use the latest available image
     otel_image       = "otel/opentelemetry-collector-contrib:0.83.0" # make sure to use the latest available image
