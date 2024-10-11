@@ -23,6 +23,31 @@ module "<REGION>-<CLUSTER_NAME>" {
   # By default, this module will also deploy the k8s manifests. Set to `false` if planning to deploy with another tool
   #deploy_manifests = false
 
+  # If you need to set environment variables for the OpenTelemetry Collector, you can do so by setting the `otel_env` variable:
+  # otel_env = {
+  #   "GOMEMLIMIT"  = "2750MiB" # set the memory limit for the OpenTelemetry Collector
+  # }
+
+  # If you want to customize the memory limiter processor for the OpenTelemetry Collector, you can do so by setting the `otel_memory_limiter` variable:
+  # otel_memory_limiter = {
+  #   check_interval         = "1s"
+  #   limit_percentage       = 70
+  #   spike_limit_percentage = 30
+  # }
+
+
+  # If you want to customize the resources for the OpenTelemetry Collector container, you can do so by setting the `otel_resources` variable:
+  # otel_resources = {
+  #   requests = {
+  #     cpu    = "100m"
+  #     memory = "256Mi"
+  #   }
+  #   limits = {
+  #     cpu    = "100m"
+  #     memory = "256Mi"
+  #   }
+  # }
+
   # when configuring multiple providers for different clusters, you can configure the module to use to correct provider alias:
   providers = {
     kubernetes = kubernetes.<PROVIDER_ALIAS>
@@ -39,6 +64,9 @@ module "<REGION>-<CLUSTER_NAME>" {
 | cluster\_oidc\_issuer\_url | The OIDC Identity issuer URL for the EKS cluster | `string` | n/a | yes |
 | ec2\_cluster | Set to true if this is a self-managed k8s cluster running on EC2 (if so, you could also set `cluster_oidc_issuer_url` to an empty string) | `bool` | `false` | no |
 | deploy\_manifests | Set to false if you don't want this module to deploy EKS Lens into your cluster | `bool` | `true` | no |
+| otel\_env | Environment variables to set for the OpenTelemetry Collector | `map(string)` | `{}` | no |
+| otel\_memory\_limiter | Configuration for the memory limiter processor | <pre>object({<br>    check_interval         = string<br>    limit_percentage       = number<br>    spike_limit_percentage = number<br>  })</pre> | <pre>{<br>  "check_interval": "1s",<br>  "limit_percentage": 70,<br>  "spike_limit_percentage": 30<br>}</pre> | no |
+| otel\_resources | Resources to set for the OpenTelemetry Collector container | <pre>object({<br>    requests = object({<br>      cpu    = optional(string)<br>      memory = optional(string)<br>    })<br>    limits = object({<br>      cpu    = optional(string)<br>      memory = optional(string)<br>    })<br>  })</pre> | <pre>{}</pre> | no |
 
 ## Outputs
 
