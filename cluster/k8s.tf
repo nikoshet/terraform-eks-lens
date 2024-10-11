@@ -491,6 +491,14 @@ resource "kubernetes_deployment" "collector" {
               }
             }
           }
+          
+          dynamic "env" {
+            for_each = var.otel_env
+            content {
+              name  = env.key
+              value = env.value
+            }
+          }
 
           resources {
             requests = var.otel_resources.requests

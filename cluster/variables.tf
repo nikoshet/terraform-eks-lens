@@ -36,6 +36,15 @@ variable "permissions_boundary" {
   default     = ""
 }
 
+
+// https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md
+variable "otel_env" {
+  type = map(string)
+  default = {
+    // "GOMEMLIMIT"  = "2750MiB"
+  } 
+}
+
 variable "otel_memory_limiter" {
   type = object({
     check_interval         = string
