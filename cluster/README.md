@@ -28,6 +28,8 @@ module "<REGION>-<CLUSTER_NAME>" {
   #   "GOMEMLIMIT"  = "2750MiB" # set the memory limit for the OpenTelemetry Collector
   # }
 
+  # We recommend to read the OpenTelemetry Collector documentation to understand the memory limiter processor configuration: https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md#best-practices
+
   # If you want to customize the memory limiter processor for the OpenTelemetry Collector, you can do so by setting the `otel_memory_limiter` variable:
   # otel_memory_limiter = {
   #   check_interval         = "1s"
