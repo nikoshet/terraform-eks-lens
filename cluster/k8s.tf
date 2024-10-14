@@ -491,7 +491,7 @@ resource "kubernetes_deployment" "collector" {
               }
             }
           }
-          
+
           dynamic "env" {
             for_each = var.otel_env
             content {
@@ -502,7 +502,7 @@ resource "kubernetes_deployment" "collector" {
 
           resources {
             requests = var.otel_resources.requests
-            limits = var.otel_resources.limits
+            limits   = var.otel_resources.limits
           }
 
           volume_mount {

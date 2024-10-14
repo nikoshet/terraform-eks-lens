@@ -42,7 +42,7 @@ variable "otel_env" {
   type = map(string)
   default = {
     // "GOMEMLIMIT"  = "2750MiB"
-  } 
+  }
 }
 
 variable "otel_memory_limiter" {
