@@ -12,9 +12,9 @@ processors:
     timeout: 30s
     send_batch_size: 800
   memory_limiter:
-    check_interval: 1s
-    limit_percentage: 70
-    spike_limit_percentage: 30
+    check_interval: ${check_interval}
+    limit_percentage: ${limit_percentage}
+    spike_limit_percentage: ${spike_limit_percentage}
   resource/1:
     attributes:
       - key: service.name

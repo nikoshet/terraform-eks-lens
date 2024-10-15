@@ -35,3 +35,40 @@ variable "permissions_boundary" {
   description = "If provided, all IAM roles will be created with this permissions boundary attached."
   default     = ""
 }
+
+
+// https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md
+variable "otel_env" {
+  type = map(string)
+  default = {
+    // "GOMEMLIMIT"  = "2750MiB"
+  }
+}
+
+variable "otel_memory_limiter" {
+  type = object({
+    check_interval         = string
+    limit_percentage       = number
+    spike_limit_percentage = number
+  })
+  default = {
+    check_interval         = "1s"
+    limit_percentage       = 70
+    spike_limit_percentage = 30
+  }
+}
+
+variable "otel_resources" {
+  type = object({
+    limits = optional(object({
+      cpu    = optional(string)
+      memory = optional(string)
+    }))
+    requests = optional(object({
+      cpu    = optional(string)
+      memory = optional(string)
+      })
+  ) })
+
+  default = {}
+}

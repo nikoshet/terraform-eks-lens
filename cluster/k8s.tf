@@ -374,6 +374,9 @@ resource "kubernetes_config_map" "doit_collector_config" {
         collector_bucket_name      = local.s3_bucket
         collector_bucket_prefix    = "eks-metrics/${local.account_id}/${local.region}/${var.cluster.name}"
         region                     = local.region
+        check_interval             = var.otel_memory_limiter.check_interval
+        limit_percentage           = var.otel_memory_limiter.limit_percentage
+        spike_limit_percentage     = var.otel_memory_limiter.spike_limit_percentage
       }
     )}"
   }
@@ -487,6 +490,19 @@ resource "kubernetes_deployment" "collector" {
                 field_path = "metadata.namespace"
               }
             }
+          }
+
+          dynamic "env" {
+            for_each = var.otel_env
+            content {
+              name  = env.key
+              value = env.value
+            }
+          }
+
+          resources {
+            requests = var.otel_resources.requests
+            limits   = var.otel_resources.limits
           }
 
           volume_mount {
