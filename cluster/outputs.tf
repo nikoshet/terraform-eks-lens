@@ -19,3 +19,8 @@ output "kube_state_metrics_deployment" {
   value       = var.deploy_manifests ? "${local.namespace}/${kubernetes_deployment.kube_state_metrics[0].metadata[0].name}" : "Not managed by this module"
   description = "Kube-state-metrics deployment name"
 }
+
+output "role_arn" {
+  value       = aws_iam_role.doit_eks_lens_collector.arn
+  description = "EKS Lens Collector ARN that can be referenced if creating deployment independently"
+}
