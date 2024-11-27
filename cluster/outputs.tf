@@ -21,6 +21,6 @@ output "kube_state_metrics_deployment" {
 }
 
 output "role_arn" {
-  value       = aws_iam_role.doit_eks_lens_collector.arn
+  value       = aws_iam_role.doit_eks_lens_collector[0].arn
   description = "EKS Lens Collector ARN that can be referenced if creating deployment independently"
 }
