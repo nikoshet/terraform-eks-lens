@@ -72,3 +72,25 @@ variable "otel_resources" {
 
   default = {}
 }
+
+variable "kube_state_tolerations" {
+  type = list(object({
+    key      = optional(string)
+    operator = optional(string)
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+
+  default = []
+}
+
+variable "otel_tolerations" {
+  type = list(object({
+    key      = optional(string)
+    operator = optional(string)
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+
+  default = []
+}

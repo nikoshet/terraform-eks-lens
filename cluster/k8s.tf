@@ -226,6 +226,17 @@ resource "kubernetes_deployment" "kube_state_metrics" {
             }
           }
         }
+
+        dynamic "toleration" {
+          for_each = var.kube_state_tolerations
+          content {
+            key      = toleration.value.key
+            operator = toleration.value.operator
+            value    = toleration.value.value
+            effect   = toleration.value.effect
+          }
+        }
+
       }
     }
   }
@@ -537,6 +548,17 @@ resource "kubernetes_deployment" "collector" {
             }
           }
         }
+
+        dynamic "toleration" {
+          for_each = var.otel_tolerations
+          content {
+            key      = toleration.value.key
+            operator = toleration.value.operator
+            value    = toleration.value.value
+            effect   = toleration.value.effect
+          }
+        }
+
       }
     }
   }
