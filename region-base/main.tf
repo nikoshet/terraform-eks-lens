@@ -10,6 +10,8 @@ locals {
 resource "aws_s3_bucket" "doit_eks_lens" {
   bucket        = "doitintl-eks-metrics-${local.account_id}-${local.region}"
   force_destroy = true
+
+  tags = merge({}, var.s3_tags)
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "doit_eks_lens" {

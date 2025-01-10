@@ -8,6 +8,11 @@ It needs to be created only _once_ per AWS account _and_ region.
 ```hcl
 module "<REGION_NAME>-base" {
   source = "git::https://github.com/doitintl/terraform-eks-lens.git//region-base"
+
+  # If you need to set specific tags on you S3 bucket, you can do so by setting the `s3_tags` variable:
+  # s3_tags = {
+  #   <key> = <value>
+  # }
 }
 ```
 
@@ -15,7 +20,7 @@ module "<REGION_NAME>-base" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-|  |  |  |  |  |
+| s3\_tags | Map of tags to assign to the bucket | `map(string)` | `{}` | no |
 
 ## Outputs
 

@@ -237,6 +237,8 @@ resource "kubernetes_deployment" "kube_state_metrics" {
           }
         }
 
+        node_selector = try(var.kube_state_node_selector, null)
+
       }
     }
   }
@@ -558,6 +560,8 @@ resource "kubernetes_deployment" "collector" {
             effect   = toleration.value.effect
           }
         }
+
+        node_selector = try(var.otel_node_selector, null)
 
       }
     }
