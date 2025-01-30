@@ -54,6 +54,14 @@ module "<REGION>-<CLUSTER_NAME>" {
   providers = {
     kubernetes = kubernetes.<PROVIDER_ALIAS>
   }
+
+  # If you want to set explicitly the NodeSelector for the OpenTelemetry Collector or the kube-state-metrics deployment, you can do so by setting the `otel_node_selector` and `kube_state_node_selector` variables:
+  # otel_node_selector = {
+  #   purpose = high-availability-node
+  # }
+  # kube_state_node_selector = {
+  #   purpose = high-availability-node
+  # }
 }
 ```
 
@@ -69,6 +77,8 @@ module "<REGION>-<CLUSTER_NAME>" {
 | otel\_env | Environment variables to set for the OpenTelemetry Collector | `map(string)` | `{}` | no |
 | otel\_memory\_limiter | Configuration for the memory limiter processor | <pre>object({<br>    check_interval         = string<br>    limit_percentage       = number<br>    spike_limit_percentage = number<br>  })</pre> | <pre>{<br>  "check_interval": "1s",<br>  "limit_percentage": 70,<br>  "spike_limit_percentage": 30<br>}</pre> | no |
 | otel\_resources | Resources to set for the OpenTelemetry Collector container | <pre>object({<br>    requests = object({<br>      cpu    = optional(string)<br>      memory = optional(string)<br>    })<br>    limits = object({<br>      cpu    = optional(string)<br>      memory = optional(string)<br>    })<br>  })</pre> | <pre>{}</pre> | no |
+| kube\_state\_node\_selector | Node Selector for the kube-state-metrics deployment | `map(string)` | `{}` | no |
+| otel\_node\_selector | Node Selector for the otel OpenTelemetry Collector deployment | `map(string)` | `{}` | no |
 
 ## Outputs
 
