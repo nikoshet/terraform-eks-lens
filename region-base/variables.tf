@@ -5,7 +5,7 @@ variable "permissions_boundary" {
 }
 
 variable "s3_tags" {
-  type = map(string)
+  type        = map(string)
   description = "Tags to apply to the S3 bucket"
-  default = {}
+  default     = {}
 }

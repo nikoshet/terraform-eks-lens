@@ -96,11 +96,11 @@ variable "otel_tolerations" {
 }
 
 variable "otel_node_selector" {
-  type = map(string)
+  type    = map(string)
   default = null
 }
 
 variable "kube_state_node_selector" {
-  type = map(string)
+  type    = map(string)
   default = null
 }
