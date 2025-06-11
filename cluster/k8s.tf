@@ -1,5 +1,4 @@
 locals {
-  namespace = "doit-eks-metrics"
 
   base_labels = {
     "app.kubernetes.io/name" = "doit_eks_lens"
@@ -25,7 +24,7 @@ resource "kubernetes_namespace_v1" "doit_eks_metrics" {
   count = var.deploy_manifests ? 1 : 0
 
   metadata {
-    name = local.namespace
+    name = var.namespace
   }
 }
 
@@ -148,7 +147,7 @@ resource "kubernetes_cluster_role_binding" "doit_kube_state_metrics" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.doit_kube_state_metrics[count.index].metadata[0].name
-    namespace = local.namespace
+    namespace = var.namespace
   }
 }
 
@@ -373,7 +372,7 @@ resource "kubernetes_cluster_role_binding" "doit_otel" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.doit_collector[count.index].metadata[0].name
-    namespace = local.namespace
+    namespace = var.namespace
   }
 }
 
