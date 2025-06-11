@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "doit_eks_lens_collector" {
     condition {
       test = "StringEquals"
       values = [
-        "system:serviceaccount:doit-eks-metrics:doit-collector",
+        "system:serviceaccount:${var.namespace}:doit-collector",
       ]
       variable = "${local.cluster_issuer_url}:sub"
     }

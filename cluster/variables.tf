@@ -7,6 +7,12 @@ variable "cluster" {
   })
 }
 
+variable "namespace" {
+  type        = string
+  description = "The namespace to deploy the EKS Lens to"
+  default     = "doit-eks-metrics"
+}
+
 variable "doit_webhook_url" {
   type    = string
   default = "https://console.doit.com/webhooks/v1/eks-metrics"
