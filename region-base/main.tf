@@ -20,6 +20,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "doit_eks_lens" {
   rule {
     id = "ExpiredDocumentsRule"
 
+    filter {}
+
     expiration {
       days = 7
     }
